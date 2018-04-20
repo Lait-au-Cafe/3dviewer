@@ -2,15 +2,6 @@
 
 int main(){
 	Viewer v;
-
-    v.init();
-
-    while(true){
-		if(!v.update()){
-			std::cout << "Exit." << std::endl;
-			break;
-		}
-	}
-
+	while(v.update()){}
 	return 0;
 }

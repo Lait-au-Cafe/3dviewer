@@ -1,6 +1,6 @@
 #include "viewer.hpp"
 
-void Viewer::init(){
+Viewer::Viewer(){
 	std::cout << "Initializing Viewer... " << std::endl;
 
     // set callback
@@ -38,25 +38,21 @@ void Viewer::init(){
 	// create shader objects
     bool is_loaded = false;
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-
     is_loaded = loadShader(vertex_shader, "glsl/vertex.glsl");
 	if(!is_loaded){ exit(EXIT_FAILURE); }
 
 	GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-
     is_loaded = loadShader(frag_shader, "glsl/fragment.glsl");
 	if(!is_loaded){ exit(EXIT_FAILURE); }
 
 	// create shader program
 	shader_program = glCreateProgram();
 
-
 	// bind shader objects
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, frag_shader);
 	glDeleteShader(vertex_shader);
 	glDeleteShader(frag_shader);
-
 
 	// link
 	glLinkProgram(shader_program);
@@ -89,7 +85,6 @@ void Viewer::init(){
 	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
-
 	// allocate memory
 	GLint buf_size = 9 * sizeof(float);
 	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_STATIC_DRAW);
@@ -99,12 +94,24 @@ void Viewer::init(){
         GL_ARRAY_BUFFER, 
         GL_BUFFER_SIZE, 
         &size_allocated);
-
 	if(size_allocated != buf_size){
-		std::cerr << "Failed to allocate memory for buffer. " << std::endl;
+		std::cerr 
+			<< "Failed to allocate memory for buffer. " 
+			<< std::endl;
 		glDeleteBuffers(1, &vertex_buffer);
 		exit(EXIT_FAILURE);
 	}
+
+	// bind to cuda resource
+	cudaDeviceProp prop;
+	int device;
+	memset(&prop, 0, sizeof(cudaDeviceProp)); // 0 fill
+	prop.major = 1; prop.minor = 0;
+	cudaChooseDevice(&device, &prop);
+	cudaGraphicsGLRegisterBuffer(
+			&cuda_resource, 
+			vertex_buffer,
+			cudaGraphicsMapFlagsNone);
 
 	// bind to vertex array object
 	glGenVertexArrays(1, &va_object);
@@ -138,4 +145,13 @@ bool Viewer::update(){
     glfwPollEvents();
 
     return (glfwWindowShouldClose(window) != GL_TRUE);
+}
+
+void Viewer::mapCudaResource(void** devPtr, size_t* size){
+	cudaGraphicsMapResources(1, &cuda_resource, NULL);
+	cudaGraphicsResourceGetMappedPointer(devPtr, size, cuda_resource);
+}
+
+void Viewer::unmapCudaResource(){
+	cudaGraphicsUnmapResources(1, &cuda_resource, NULL);
 }

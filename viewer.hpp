@@ -3,23 +3,30 @@
 #include <fstream>
 #include <string>
 #include <iterator>
+#include <string.h>
 
+// OpenGL includes
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 
+// CUDA Includes
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <cuda_gl_interop.h>
+
 class Viewer {
 public:
-    void init();
+    Viewer();
     bool update();
+	void mapCudaResource(void**, size_t*);
+	void unmapCudaResource();
 
 private:
     GLFWwindow* window;
     GLuint shader_program;
     GLuint va_object;
 
-//    static bool loadShader(GLuint, const char*);
-//    static void onError(int, const char*);
-//    static void checkGLError();
+	cudaGraphicsResource* cuda_resource;
 
     static bool loadShader(GLuint shader_id, const char* filename){
         // load shader file
@@ -64,7 +71,8 @@ private:
 
     static void onError(int err, const char* msg){
         std::cerr 
-            << "GLFW Error  Code:" << err << "\n"
+            << "GLFW Error at " << __FILE__ << ":" << __LINE__
+			<< " Code:" << err << "\n"
             << msg
             << std::endl;
         return;
