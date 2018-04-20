@@ -5,15 +5,21 @@ __global__ void devStoreVertices(
 	const int num
 ) {
 	const int tx = blockIdx.x*blockDim.x + threadIdx.x;
-	const int ty = blockIdx.y*blockDim.y + threadIdx.y;
+//	const int ty = blockIdx.y*blockDim.y + threadIdx.y;
 	
-	const int width = 3;
-	uint coord;
+	const int width = 2;
+	uint coord = tx;
+
+	if(coord > 3){
+		return;
+	}
 
 	float x, y, z;
 	x = 0.2 + (tx % width) * 0.1;
-	y = 0.2 + (ty / width) * 0.1;
+	y = 0.2 + (tx / width) * 0.1;
 	z = 0;
+
+//	Vertex[coord] = 1.0;
 
 	coord = 3 * tx;
 	Vertex[coord] = x;
@@ -28,8 +34,8 @@ void StoreVertices(
 	const int num
 ){
 	// define thread / block size
-	dim3 dimBlock(32, 1, 1);
-	dim3 dimGrid(num / dimBlock.x, 1, 1);
+	dim3 dimBlock(1, 1, 1);
+	dim3 dimGrid(9, 1, 1);
 
 	devStoreVertices<<<dimGrid, dimBlock, 0 >>>(input, num);
 	return;

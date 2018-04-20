@@ -6,11 +6,22 @@ int main(){
 	const int num_vertex = 3;
 	Viewer v(num_vertex, "3D Viewer");
 
-	float *vertices;
-	size_t pitch;
+	float *d_vertices;
+	size_t length;
 
-	v.mapCudaResource((void**)&vertices, &pitch);
-	StoreVertices(vertices, num_vertex);
+	float *vertices = (float*)malloc(num_vertex * 3 * sizeof(float));
+
+	v.mapCudaResource((void**)&d_vertices, &length);
+	std::cout << length << std::endl;
+//	checkCudaErrors(cudaMemcpy((void*)d_vertices, (void*)vertices, length, cudaMemcpyHostToDevice));
+//	for(int i = 0; i < (int)length >> 2; i++){
+//		std::cout << i << ":" << vertices[i] << std::endl;
+//	}
+	StoreVertices(d_vertices, num_vertex);
+	checkCudaErrors(cudaMemcpy((void*)vertices, (void*)d_vertices, length, cudaMemcpyDeviceToHost));
+	for(int i = 0; i < (int)(length / sizeof(float)); i++){
+		std::cout << i << ":" << vertices[i] << std::endl;
+	}
 	v.unmapCudaResource();
 
 	// Main Loop
