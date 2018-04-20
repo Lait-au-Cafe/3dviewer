@@ -17,7 +17,7 @@
 
 class Viewer {
 public:
-    Viewer();
+    Viewer(int const, const char *const);
     bool update();
 	void mapCudaResource(void**, size_t*);
 	void unmapCudaResource();

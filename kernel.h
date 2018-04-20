@@ -14,10 +14,4 @@ __constant__ float gaussWindow[GAUSS_SIZE];
 //=========================================================
 // Device Functions
 //=========================================================
-void GaussFilter(
-	uchar* input,
-	uchar* result,
-	size_t pitch,
-	uint width,
-	uint height
-);
+void StoreVertices(float*,int);

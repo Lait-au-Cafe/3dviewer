@@ -1,59 +1,36 @@
 #include "kernel.h"
 
-__global__ void devGaussFilter(
-	const uchar* Input,
-	uchar* Result,
-	const int pitch,
-	const int width,
-	const int height
+__global__ void devStoreVertices(
+	float* Vertex,
+	const int num
 ) {
 	const int tx = blockIdx.x*blockDim.x + threadIdx.x;
 	const int ty = blockIdx.y*blockDim.y + threadIdx.y;
-	int i, j, u, v;
-	int coord;
+	
+	const int width = 3;
+	uint coord;
 
-	if (tx >= width || ty >= height) {
-		return;
-	}
+	float x, y, z;
+	x = 0.2 + (tx % width) * 0.1;
+	y = 0.2 + (ty / width) * 0.1;
+	z = 0;
 
-	float sum = 0;
-	//float sigma = (float)(GAUSS_WING) / 3;
-	float coef;
-	uchar data;
-
-	int g_id = 0;
-	for (j = -GAUSS_WING; j <= GAUSS_WING; j++) {
-		v = min(max(ty + j, 0), height - 1);
-
-		for (i = -GAUSS_WING; i <= GAUSS_WING; i++) {
-			u = min(max(tx + i, 0), width - 1);
-
-			coord = u + v * pitch;
-			data = Input[coord];
-
-			//coef = expf((i * i + j * j) / (-2 * sigma * sigma)) / (2 * M_PI * sigma * sigma);
-			coef = gaussWindow[g_id];
-			g_id++;
-
-			sum += coef * (float)(data);
-		}
-	}
-
-	coord = tx + ty * pitch;
-	Result[coord] = (uchar)min(max((int)sum, 0), 255);
+	coord = 3 * tx;
+	Vertex[coord] = x;
+	coord = 3 * tx + 1;
+	Vertex[coord] = y;
+	coord = 3 * tx + 2;
+	Vertex[coord] = z;
 }
 
-void GaussFilter(
-	uchar* input,
-	uchar* result,
-	size_t pitch,
-	uint width,
-	uint height
+void StoreVertices(
+	float* input,
+	const int num
 ){
 	// define thread / block size
-	dim3 dimBlock(32, 32, 1);
-	dim3 dimGrid(width / dimBlock.x, height / dimBlock.y, 1);
+	dim3 dimBlock(32, 1, 1);
+	dim3 dimGrid(num / dimBlock.x, 1, 1);
 
-	devGaussFilter<<<dimGrid, dimBlock, 0 >>>(input, result, pitch, width, height);
+	devStoreVertices<<<dimGrid, dimBlock, 0 >>>(input, num);
 	return;
 }

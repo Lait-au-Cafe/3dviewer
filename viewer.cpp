@@ -1,6 +1,6 @@
 #include "viewer.hpp"
 
-Viewer::Viewer(){
+Viewer::Viewer(int const num_vertex, const char *const window_name){
 	std::cout << "Initializing Viewer... " << std::endl;
 
     // set callback
@@ -16,7 +16,7 @@ Viewer::Viewer(){
     window = glfwCreateWindow(
         640, // width
         480, // height
-        "OpenGL Sample", // title
+        window_name, // title
         NULL,
         NULL
     );
@@ -86,7 +86,7 @@ Viewer::Viewer(){
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
 	// allocate memory
-	GLint buf_size = 9 * sizeof(float);
+	GLint buf_size = num_vertex * 3 * sizeof(float);
 	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_STATIC_DRAW);
 
 	GLint size_allocated = 0;
