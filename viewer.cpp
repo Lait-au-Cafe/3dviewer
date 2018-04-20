@@ -155,3 +155,72 @@ void Viewer::mapCudaResource(void** devPtr, size_t* size){
 void Viewer::unmapCudaResource(){
 	cudaGraphicsUnmapResources(1, &cuda_resource, NULL);
 }
+
+
+
+
+
+void impl_checkGLErrors(const char *const file, int const line){
+	GLenum err = glGetError();
+
+	if(err == GL_NO_ERROR){
+//		std::cout << "No GL Error is reported. " << std::endl;
+		return;
+	}
+
+	std::stringstream msg;
+	switch(err){
+		case GL_INVALID_ENUM:
+			msg << "An unacceptable value is specified"
+				<< " for an enumerated argument. ";
+			break;
+		case GL_INVALID_VALUE:
+			msg << "A numeric argument is out of range. ";
+			break;
+		case GL_INVALID_OPERATION:
+			msg << "The specified operation is not allowed"
+				<< " in the current state. ";
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			msg << "The framebuffer object is not complete.";
+			break;
+		case GL_OUT_OF_MEMORY:
+			msg << "There is not enough memory left"
+				<< " to execute the command. ";
+			break;
+		case GL_STACK_UNDERFLOW:
+			msg << "An attempt has been made to perform an operation"
+				<< " that would cause an internal stack to underflow.";
+			break;
+		case GL_STACK_OVERFLOW:
+			msg << "An attempt has been made to perform an operation"
+				<< " that would cause an internal stack to overflow.";
+			break;
+		default:
+			msg << "Unknown error id";
+	}
+
+	std::cerr 
+		<< "OpenGL Error at " << file << ":" << line << "\n"
+		<< msg.str()
+		<< std::endl;
+	
+	return;
+}
+
+void impl_checkCudaErrors(cudaError_t err, const char *const file, int const line){
+	if(err == cudaSuccess){
+//		std::cout << "No CUDA Error is reported. " << std::endl;
+		return;
+	}
+
+	std::stringstream msg;
+	msg << "Error Code:" << err;
+
+	std::cerr
+		<< "CUDA error at " << file << ":" << line << "\n"
+		<< msg.str()
+		<< std::endl;
+	cudaDeviceReset();
+	exit(EXIT_FAILURE);
+}

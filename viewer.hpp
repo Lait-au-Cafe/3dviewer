@@ -14,6 +14,7 @@
 #include <device_launch_parameters.h>
 #include <cuda_gl_interop.h>
 
+
 class Viewer {
 public:
     Viewer();
@@ -77,53 +78,14 @@ private:
             << std::endl;
         return;
     }
-
-    static void checkGLError(){
-        GLenum err = glGetError();
-
-        if(err == GL_NO_ERROR){
-            std::cerr << "No error is reported. " << std::endl;
-            return;
-        }
-
-        std::stringstream msg;
-        switch(err){
-            case GL_INVALID_ENUM:
-                msg << "An unacceptable value is specified"
-                    << " for an enumerated argument. ";
-                break;
-            case GL_INVALID_VALUE:
-                msg << "A numeric argument is out of range. ";
-                break;
-            case GL_INVALID_OPERATION:
-                msg << "The specified operation is not allowed"
-                    << " in the current state. ";
-                break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                msg << "The framebuffer object is not complete.";
-                break;
-            case GL_OUT_OF_MEMORY:
-                msg << "There is not enough memory left"
-                    << " to execute the command. ";
-                break;
-            case GL_STACK_UNDERFLOW:
-                msg << "An attempt has been made to perform an operation"
-                    << " that would cause an internal stack to underflow.";
-                break;
-            case GL_STACK_OVERFLOW:
-                msg << "An attempt has been made to perform an operation"
-                    << " that would cause an internal stack to overflow.";
-                break;
-            default:
-                msg << "Unknown error id";
-        }
-
-        std::cerr 
-            << "OpenGL Error at " << __FILE__ << ":" << __LINE__ << "\n"
-            << msg.str()
-            << std::endl;
-        
-        return;
-    }
-
 };
+
+#ifndef checkCudaErrors
+#define checkCudaErrors(val) impl_checkCudaErrors((val), __FILE__, __LINE__)
+#endif
+void impl_checkCudaErrors(cudaError_t, const char *const, int const);
+
+#ifndef checkGLErrors
+#define checkGLErrors() impl_checkGLErrors(__FILE__, __LINE__)
+#endif
+void impl_checkGLErrors(const char *const, int const);
