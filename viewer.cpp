@@ -107,11 +107,11 @@ Viewer::Viewer(){
 	int device;
 	memset(&prop, 0, sizeof(cudaDeviceProp)); // 0 fill
 	prop.major = 1; prop.minor = 0;
-	cudaChooseDevice(&device, &prop);
-	cudaGraphicsGLRegisterBuffer(
+	checkCudaErrors(cudaChooseDevice(&device, &prop));
+	checkCudaErrors(cudaGraphicsGLRegisterBuffer(
 			&cuda_resource, 
 			vertex_buffer,
-			cudaGraphicsMapFlagsNone);
+			cudaGraphicsMapFlagsNone));
 
 	// bind to vertex array object
 	glGenVertexArrays(1, &va_object);
@@ -148,12 +148,12 @@ bool Viewer::update(){
 }
 
 void Viewer::mapCudaResource(void** devPtr, size_t* size){
-	cudaGraphicsMapResources(1, &cuda_resource, NULL);
-	cudaGraphicsResourceGetMappedPointer(devPtr, size, cuda_resource);
+	checkCudaErrors(cudaGraphicsMapResources(1, &cuda_resource, NULL));
+	checkCudaErrors(cudaGraphicsResourceGetMappedPointer(devPtr, size, cuda_resource));
 }
 
 void Viewer::unmapCudaResource(){
-	cudaGraphicsUnmapResources(1, &cuda_resource, NULL);
+	checkCudaErrors(cudaGraphicsUnmapResources(1, &cuda_resource, NULL));
 }
 
 
