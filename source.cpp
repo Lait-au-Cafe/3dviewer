@@ -30,7 +30,7 @@ int main(){
 //	}
 
 	//	kernel execution
-//	StoreVertices(d_vertices, num_vertex);
+	StoreVertices(d_vertices, 5, num_vertex);
 
 	// collect the result
 	checkCudaErrors(cudaMemcpy(
