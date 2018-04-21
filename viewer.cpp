@@ -56,8 +56,10 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
 
 	// link
 	glLinkProgram(shader_program);
+checkGLErrors();
 	GLint result = GL_FALSE;
 	glGetProgramiv(shader_program, GL_LINK_STATUS, &result);
+checkGLErrors();
 	if(result != GL_TRUE){
 		GLsizei log_len = 0;
 		GLchar log_msg[1024] = {};
@@ -77,8 +79,11 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
 	float points[] = {
 		0.0f, 0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f
+		-0.5f, -0.5f, 0.0f,
+		0.2f, 0.5f, 0.0f,
+		-0.2f, 0.5f, 0.0f
 	};
+//	float *points = (float*)calloc(3 * num_vertex, sizeof(float));
 
 	// generate & bind buffer
 	GLuint vertex_buffer;
@@ -87,13 +92,20 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
 
 	// allocate memory
 	GLint buf_size = num_vertex * 3 * sizeof(float);
-	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_STATIC_DRAW);
+//	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_DYNAMIC_DRAW);
+checkGLErrors();
 
 	GLint size_allocated = 0;
 	glGetBufferParameteriv(
         GL_ARRAY_BUFFER, 
         GL_BUFFER_SIZE, 
         &size_allocated);
+checkGLErrors();
+	std::cout << "Requested OpenGL Buffer:"
+		<< buf_size << "Byte" << std::endl;
+	std::cout << "Allocated OpenGL Buffer:" 
+		<< size_allocated << "Byte" << std::endl;
 	if(size_allocated != buf_size){
 		std::cerr 
 			<< "Failed to allocate memory for buffer. " 
@@ -115,31 +127,47 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
 
 	// bind to vertex array object
 	glGenVertexArrays(1, &va_object);
+checkGLErrors();
 	glBindVertexArray(va_object);
+checkGLErrors();
 	glEnableVertexAttribArray(0);
+checkGLErrors();
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+checkGLErrors();
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+checkGLErrors();
 
 	// unbind
 	glBindVertexArray(0);
+checkGLErrors();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+checkGLErrors();
+
+	glPointSize(5);
+checkGLErrors();
 }
 
 bool Viewer::update(){
     // initialize
     glClear(GL_COLOR_BUFFER_BIT);
+checkGLErrors();
 
     // bind program
     glUseProgram(shader_program);
+checkGLErrors();
 
     // bind buffer
     glBindVertexArray(va_object);
+checkGLErrors();
 
     // draw
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_POINTS, 0, 3);
+checkGLErrors();
 
 	// unbind
 	glBindVertexArray(0);
+checkGLErrors();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
