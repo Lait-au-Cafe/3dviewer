@@ -26,6 +26,7 @@ private:
     GLFWwindow* window;
     GLuint shader_program;
     GLuint va_object;
+	int num_vertex;
 
 	cudaGraphicsResource* cuda_resource;
 

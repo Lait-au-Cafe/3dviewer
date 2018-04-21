@@ -2,8 +2,12 @@
 #include "kernel.h"
 
 int main(){
+	const int num_vertex_per_layer = 50;
+	const int width = 5;
+	const int layers = 2;
+	const int num_vertex = num_vertex_per_layer * layers;
+
 	// Create Viewer
-	const int num_vertex = 5;
 	Viewer v(num_vertex, "3D Viewer");
 
 	float *d_vertices;
@@ -30,7 +34,7 @@ int main(){
 //	}
 
 	//	kernel execution
-	StoreVertices(d_vertices, 5, num_vertex);
+	StoreVertices(d_vertices, width, num_vertex_per_layer, layers);
 
 	// collect the result
 	checkCudaErrors(cudaMemcpy(

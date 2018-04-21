@@ -9,17 +9,22 @@ __global__ void devStoreVertices(
 ) {
 	const int tx = blockIdx.x*blockDim.x + threadIdx.x;
 	const int ty = blockIdx.y*blockDim.y + threadIdx.y;
+	const int tz = blockIdx.z*blockDim.z + threadIdx.z;
 	
 	uint coord = tx + ty * width;
-	if(tx >= width || coord > num_vertex){
+	if(tx >= width || coord >= num_vertex){
 		return;
 	}
 
 	float vx, vy, vz;
 	vx = (float)tx * 0.1 - 0.5;
 	vy = (float)ty * 0.1 - 0.5;
-	vz = 0.0;
+	vz = (float)tz * 0.05;
 
+	vx = 0.95 * vx + 0.31 * vz;
+	vz = -0.31 * vx + 0.95 * vz;
+
+	coord = tx + ty * width + tz * num_vertex;
 	uint index;
 	index = 3 * coord;
 	Vertex[index] = vx;
@@ -32,7 +37,8 @@ __global__ void devStoreVertices(
 void StoreVertices(
 	float* vertex,
 	const int width,
-	const int num_vertex
+	const int num_vertex,
+	const int layers
 ){
 	const int height = (num_vertex - 1) / width + 1;
 
@@ -41,7 +47,7 @@ void StoreVertices(
 	dim3 dimGrid(
 			(width - 1) / dimBlock.x + 1, 
 			(height - 1) / dimBlock.y + 1, 
-			1);
+			layers);
 
 	std::cout
 		<< "\n== Configs of StoreVertex ==\n"

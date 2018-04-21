@@ -76,24 +76,15 @@ checkGLErrors();
 	// Prepare Buffers
 	//=========================================
 	
-	float points[] = {
-		0.0f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.2f, 0.5f, 0.0f,
-		-0.2f, 0.5f, 0.0f
-	};
-//	float *points = (float*)calloc(3 * num_vertex, sizeof(float));
-
 	// generate & bind buffer
 	GLuint vertex_buffer;
 	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 
 	// allocate memory
+	this->num_vertex = num_vertex;
 	GLint buf_size = num_vertex * 3 * sizeof(float);
-//	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, buf_size, points, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, buf_size, NULL, GL_DYNAMIC_DRAW);
 checkGLErrors();
 
 	GLint size_allocated = 0;
@@ -143,7 +134,7 @@ checkGLErrors();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 checkGLErrors();
 
-	glPointSize(5);
+	glPointSize(8);
 checkGLErrors();
 }
 
@@ -162,7 +153,7 @@ checkGLErrors();
 
     // draw
     //glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawArrays(GL_POINTS, 0, 3);
+    glDrawArrays(GL_POINTS, 0, num_vertex);
 checkGLErrors();
 
 	// unbind
