@@ -15,4 +15,4 @@ __constant__ float gaussWindow[GAUSS_SIZE];
 // Device Functions
 //=========================================================
 void StoreVertices(float*, const int, const int, const int);
-void MLS(float*, const int, const int, const int, const int, const float);
+void MLS(const float* const, float*, const int, const int, const int, const int, const float);

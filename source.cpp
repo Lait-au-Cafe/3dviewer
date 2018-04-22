@@ -2,57 +2,76 @@
 #include "kernel.h"
 
 int main(){
-	const int num_vertex_per_layer = 50;
 	const int width = 5;
+	const int height = 8;
 	const int layers = 2;
-	const int num_vertex = num_vertex_per_layer * layers;
+	const int num_vertex = width * height * layers;
 
 	// Create Viewer
-	Viewer v(num_vertex, "3D Viewer");
+	Viewer viewer(num_vertex, "3D Viewer");
 
-	float *d_vertices;
+	// allocate device memory
+	float* d_initial;
+	checkCudaErrors(cudaMalloc(&d_initial, num_vertex * 3 * sizeof(float)));
+
+	// initialize buffer
+	StoreVertices(d_initial, width, height, layers);
+
+	float *d_vertices; 
 	size_t length;
 
-	float *vertices = (float*)malloc(num_vertex * 3 * sizeof(float));
-
-	v.mapCudaResource((void**)&d_vertices, &length);
-	std::cout << "Allocated CUDA Buffer:"
+	//===============================
+	// Start Mapping >>>
+	//===============================
+	viewer.mapCudaResource((void**)&d_vertices, &length);
+	std::cout << "Mapped CUDA Buffer:"
 		<< length << "Byte" << std::endl;
 	if(length != num_vertex * 3 * sizeof(float)){
 		std::cerr 
-			<< "The size of the memory allocated is "
+			<< "The size of the memory mapped is "
 			<< "different from that requested. \n"
-			<< "Requested : " << num_vertex * 3 * sizeof(float) << "Bytes/n"
-			<< "Allocated : " << length << "Bytes/n"
+			<< "Requested : " 
+				<< num_vertex * 3 * sizeof(float) << "Bytes/n"
+			<< "Mapped : " << length << "Bytes/n"
 			<< std::endl;
 		exit(EXIT_FAILURE);
 	}
 
-//	checkCudaErrors(cudaMemcpy((void*)d_vertices, (void*)vertices, length, cudaMemcpyHostToDevice));
-//	for(int i = 0; i < (int)length >> 2; i++){
-//		std::cout << i << ":" << vertices[i] << std::endl;
-//	}
-
 	//	kernel execution
-	StoreVertices(d_vertices, width, num_vertex_per_layer, layers);
+	//StoreVertices(d_vertices, width, height, layers);
+	int window = 2;
+	float radius = 100;
+	MLS(d_initial, d_vertices, width, height, layers, window, radius);
 
 	// collect the result
+	float *vertices = (float*)malloc(num_vertex * 3 * sizeof(float));
 	checkCudaErrors(cudaMemcpy(
 		(void*)vertices, 
 		(void*)d_vertices, 
 		length, 
 		cudaMemcpyDeviceToHost));
-	for(int i = 0; i < (int)(length / sizeof(float)); i+=3){
-		std::cout 
-			<< i/3+1 << " : ("
-			<< vertices[i] << ", "
-			<< vertices[i+1] << ", "
-			<< vertices[i+2] << ")" << std::endl;
+
+	viewer.unmapCudaResource();
+	//===============================
+	// <<< End Mapping
+	//===============================
+
+	// print vertex coordinates
+	int index = 0;
+	for(int j = 0; j < layers; j++){
+		std::cout << "\nLayer " << j+1 << std::endl;
+		for(int i = 0; i < width * height; i++){
+			std::cout
+				<< i+1 << " : ("
+				<< vertices[3 * index] << ", "
+				<< vertices[3 * index + 1] << ", "
+				<< vertices[3 * index + 2] << ")"
+				<< std::endl;
+			index++;
+		}
 	}
 
-	v.unmapCudaResource();
-
 	// Main Loop
-	while(v.update()){}
+	while(viewer.update()){}
 	return 0;
 }
