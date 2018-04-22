@@ -1,10 +1,11 @@
 #include "viewer.hpp"
 #include "kernel.h"
+#include <fstream>
 
 int main(){
-	const int width = 5;
-	const int height = 8;
-	const int layers = 2;
+	const int width = 400;
+	const int height = 200;
+	const int layers = 1;
 	const int num_vertex = width * height * layers;
 
 	// Create Viewer
@@ -56,20 +57,29 @@ int main(){
 	// <<< End Mapping
 	//===============================
 
-	// print vertex coordinates
-	int index = 0;
-	for(int j = 0; j < layers; j++){
-		std::cout << "\nLayer " << j+1 << std::endl;
-		for(int i = 0; i < width * height; i++){
-			std::cout
-				<< i+1 << " : ("
-				<< vertices[3 * index] << ", "
-				<< vertices[3 * index + 1] << ", "
-				<< vertices[3 * index + 2] << ")"
-				<< std::endl;
-			index++;
-		}
-	}
+//	std::ofstream logfile("data_raw.csv");
+//	logfile << "x,y,z,r,g,b" << std::endl;
+//	// print vertex coordinates
+//	int index = 0;
+//	for(int j = 0; j < layers; j++){
+//		std::cout << "\nLayer " << j+1 << std::endl;
+//		for(int i = 0; i < width * height; i++){
+//			std::cout
+//				<< i+1 << " : ("
+//				<< vertices[3 * index] << ", "
+//				<< vertices[3 * index + 1] << ", "
+//				<< vertices[3 * index + 2] << ")"
+//				<< std::endl;
+//			logfile 
+//				<< vertices[3 * index] << ","
+//				<< vertices[3 * index + 1] << ","
+//				<< vertices[3 * index + 2] << ","
+//				<< (j == 0 ? 1.0 : 0.0) << ","
+//				<< (j == 0 ? 0.0 : 1.0) << ","
+//				<< 0.0 << std::endl;
+//			index++;
+//		}
+//	}
 
 	// Main Loop
 	while(viewer.update()){}

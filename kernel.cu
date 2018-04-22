@@ -1,6 +1,10 @@
 #include <iostream>
 #include <stdio.h>
 #include "kernel.h"
+#include <helper_math.h>
+
+#define PI 3.14159265358979323846
+inline __device__ float radians(float x){ return x * PI / 180; }
 
 __global__ void devStoreVertices(
 	float* Vertex,
@@ -16,14 +20,23 @@ __global__ void devStoreVertices(
 		return;
 	}
 
-	float vx, vy, vz;
-	vx = (float)tx * 0.1 - 0.5;
-	vy = (float)ty * 0.1 - 0.5;
-	vz = (float)tz * 0.05;
+	uint seed = tx + ty * width + tz * width * height;
+	seed = seed ^ (seed << 13);
+	seed = seed ^ (seed >> 17);
+	seed = seed ^ (seed << 15);
+	float val = (float)(seed % 10000) / 10000;
 
-	// rotate a bit
-	//vx = 0.95 * vx + 0.31 * vz;
-	//vz = -0.31 * vx + 0.95 * vz;
+	float vx, vy, vz;
+	vx = (float)tx * 0.05 + (tz * 0.01);
+	vy = (float)ty * 0.05;
+	//vz = (float)tz;
+	vz = val;
+
+	// scale
+	float scale = 0.25;
+	vx *= scale;
+	vy *= scale;
+	vz *= scale;
 
 	uint coord = tx + ty * width + tz * width * height;
 	uint index;
@@ -67,6 +80,10 @@ void StoreVertices(
 	return;
 }
 
+inline __device__ float mls_weight(float distance, float radius){ 
+	return (distance > radius) ? 0 : powf(1-powf(distance / radius, 2), 4); 
+}
+
 __global__ void devMLS(
 	const float* Input,
 	float* Output,
@@ -92,30 +109,46 @@ __global__ void devMLS(
 	const int max_z = min(layers - 1, tz + window);
 
 	uint coord, index;
-	float vx, vy, vz;
+	float3 ctr_pos, v_pos, rel_pos, accum_pos = make_float3(0.0f, 0.0f, 0.0f);
+	float w, sum = 0;
+
+	coord = tx + ty * width + tz * width * height;
+	index = 3 * coord;
+	ctr_pos.x = Input[index];
+	index = 3 * coord + 1;
+	ctr_pos.y = Input[index];
+	index = 3 * coord + 2;
+	ctr_pos.z = Input[index];
+
 	for(int z = min_z; z <= max_z; z++){
 	for(int y = min_y; y <= max_y; y++){
 	for(int x = min_x; x <= max_x; x++){
 		coord = x + y * width + z * width * height;
 
 		index = 3 * coord;
-		vx = Input[index];
+		v_pos.x = Input[index];
 		index = 3 * coord + 1;
-		vy = Input[index];
+		v_pos.y = Input[index];
 		index = 3 * coord + 2;
-		vz = Input[index];
+		v_pos.z = Input[index];
+
+		rel_pos = v_pos - ctr_pos;
+		w = mls_weight(length(rel_pos), radius);
+		accum_pos += v_pos * w;
+		sum += w;
 	}}}
 
+	float3 avrg_pos = accum_pos / sum;
+	float3 norm = make_float3(0.0, 0.0, 1.0);
+	float3 res_pos = ctr_pos + dot(norm, avrg_pos - ctr_pos) * norm;
+	//res_pos = ctr_pos;
 	coord = tx + ty * width + tz * width * height;
 	index = 3 * coord;
-	vx = Input[index];
-	Output[index] = vx;
+	Output[index] = res_pos.x;
 	index = 3 * coord + 1;
-	vy = Input[index];
-	Output[index] = vy;
+	Output[index] = res_pos.y;
 	index = 3 * coord + 2;
-	vz = Input[index];
-	Output[index] = vz;
+	Output[index] = res_pos.z;
 }
 
 void MLS(

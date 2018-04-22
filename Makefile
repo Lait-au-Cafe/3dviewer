@@ -12,7 +12,7 @@ source.o: source.cpp viewer.hpp
 	g++ -c $< $(CXXFLAGS) $(CUINC)
 
 kernel.o: kernel.cu kernel.h
-	nvcc $(NVCCFLAGS) -c $< $(CUINC)
+	nvcc $(NVCCFLAGS) -c $< $(CUINC) -I/usr/local/cuda/samples/common/inc
 
 viewer.o: viewer.cpp viewer.hpp
 	g++ -c $< $(CXXFLAGS) $(CUINC)

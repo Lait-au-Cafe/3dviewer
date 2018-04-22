@@ -14,8 +14,8 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
 
     // create window
     window = glfwCreateWindow(
-        640, // width
-        480, // height
+        1240 * 2, // width
+        1240 * 2, // height
         window_name, // title
         NULL,
         NULL
@@ -76,6 +76,7 @@ checkGLErrors();
 	// Prepare Buffers
 	//=========================================
 	
+	// Position Attribute
 	// generate & bind buffer
 	GLuint vertex_buffer;
 	glGenBuffers(1, &vertex_buffer);
@@ -116,16 +117,29 @@ checkGLErrors();
 			vertex_buffer,
 			cudaGraphicsMapFlagsNone));
 
+	// Color Attribute
+	GLuint color_buffer;
+	glGenBuffers(1, &color_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+
 	// bind to vertex array object
 	glGenVertexArrays(1, &va_object);
 checkGLErrors();
 	glBindVertexArray(va_object);
 checkGLErrors();
+	// vertex
 	glEnableVertexAttribArray(0);
 checkGLErrors();
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 checkGLErrors();
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+checkGLErrors();
+	// color
+	glEnableVertexAttribArray(1);
+checkGLErrors();
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+checkGLErrors();
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 checkGLErrors();
 
 	// unbind
