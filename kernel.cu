@@ -29,8 +29,8 @@ __global__ void devStoreVertices(
 	float vx, vy, vz;
 	vx = (float)tx * 0.05 + (tz * 0.01);
 	vy = (float)ty * 0.05;
-	//vz = (float)tz;
-	vz = val;
+	vz = (float)tz;
+	//vz = val;
 
 	// scale
 	float scale = 0.25;

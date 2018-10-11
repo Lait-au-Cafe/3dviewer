@@ -11,7 +11,13 @@ Viewer::Viewer(int const num_vertex, const char *const window_name){
         std::cerr << "Failed to initialize opengl. " << std::endl;
         exit(EXIT_FAILURE);
     }
-
+	
+	// glfw hints
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
     // create window
     window = glfwCreateWindow(
         1240 * 2, // width

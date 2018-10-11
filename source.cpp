@@ -5,7 +5,7 @@
 int main(){
 	const int width = 400;
 	const int height = 200;
-	const int layers = 1;
+	const int layers = 2;
 	const int num_vertex = width * height * layers;
 
 	// Create Viewer
